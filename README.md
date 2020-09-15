@@ -3,11 +3,12 @@ cloudmusic: 网易云爬虫解决方案
 
 一个功能强大的python库，使用最简单易用的方法获取一切你想要的信息。
 支持python3以上版本
+Fork 自https://github.com/p697/cloudmusic，自己需要进行了改动
 
 安装
 -----
 ```bash
-pip install cloudmusic
+pip install git+https://github.com/phecko/cloudmusic.git
 ```
 
 简单示例

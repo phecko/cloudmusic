@@ -14,11 +14,11 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'cloudmusic'
 DESCRIPTION = '网易云爬虫解决方案'
-URL = 'https://github.com/p697/cloudmusic'
+URL = 'https://github.com/phecko/cloudmusic.git'
 EMAIL = '254139147@qq.com'
 AUTHOR = 'p697'
 REQUIRES_PYTHON = '>=3.0.0'
-VERSION = '0.1.1'
+VERSION = '0.2.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

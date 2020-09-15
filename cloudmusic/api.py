@@ -4,8 +4,9 @@ from . import encrypt
 import json
 import random
 
-
 class Api:
+
+    musicU = 'e4ace7b13afdd88161175bda1c091445ad6bc398f36fb0f0315f1fa0787d4fbce7c70899629a7e58dcb329764b52b00341049cea1c6bb9b6'
 
     def __init__(self):
         self.userAgent = [
@@ -29,12 +30,12 @@ class Api:
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/13.10586",
             "Mozilla/5.0 (iPad; CPU OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A300 Safari/602.1"
         ]
-        musicU = 'e4ace7b13afdd88161175bda1c091445ad6bc398f36fb0f0315f1fa0787d4fbce7c70899629a7e58dcb329764b52b00341049cea1c6bb9b6'
+
         self.CookiesList = [
             'os=pc; osver=Microsoft-Windows-10-Professional-build-10586-64bit; appver=2.0.3.131777; channel=netease; __remember_me=true',
-            'MUSIC_U=' + musicU + '; buildver=1506310743; resolution=1920x1080; mobilename=MI5; osver=7.0.1; channel=coolapk; os=android; appver=4.2.0',
+            'MUSIC_U=' + self.__class__.musicU + '; buildver=1506310743; resolution=1920x1080; mobilename=MI5; osver=7.0.1; channel=coolapk; os=android; appver=4.2.0',
             'osver=%E7%89%88%E6%9C%AC%2010.13.3%EF%BC%88%E7%89%88%E5%8F%B7%2017D47%EF%BC%89; os=osx; appver=1.5.9; MUSIC_U=' +
-            musicU + '; channel=netease;'
+            self.__class__.musicU + '; channel=netease;'
         ]
         self.headers = {
             'User-Agent': random.choice(self.userAgent),
@@ -76,7 +77,8 @@ class Api:
         url = "https://music.163.com/weapi/v3/song/detail"
         param = dict(c=json.dumps(
             [{"id": _id} for _id in para["ID"]]), ids=json.dumps(para["ID"]))
-        return self.send(url, param)
+        rsp =  self.send(url, param)
+        return rsp
 
     # 是个让人脑阔疼的api
     def get_playlist(self, para, method=""):

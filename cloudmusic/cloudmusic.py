@@ -1,10 +1,12 @@
 from . import sessions
+from . import api
 
+def setMusicU(musicUserCookie):
+    api.Api.musicU = musicUserCookie
 
 def getMusic(para):
     with sessions.Session() as session:
         return session.request("song", para)
-
 
 def getPlaylist(para):
     with sessions.Session() as session:

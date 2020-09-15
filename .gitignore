@@ -49,6 +49,9 @@ coverage.xml
 *.mo
 *.pot
 
+.DS_Store
+.idea
+
 # Django stuff:
 *.log
 local_settings.py

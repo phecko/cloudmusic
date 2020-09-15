@@ -7,28 +7,37 @@ import time
 
 
 
-def download(dirs, music):
+def download(dirs, music, name=None, exist_ok=False):
 	if len(music.artist) == 1:
 		artist = music.artist[0]
 	else:
 		artist = ""
-		for ar in music.artist:
-			artist += ar + " "
-	name = music.name + " - " + artist + "." + music.type
+		if music.artist:
+			artist = "/".join(music.artist)
+
+	level = music.level
+	if not name:
+		name = "{}-{}-{}.{}".format(music.name,artist, level, music.type)
+	else:
+		name += "." + music.type
 
 	if not dirs:
-		dirs = "cloudmusic\\" + name
-		defalut_dirs = str(os.getcwd()) + '\\cloudmusic'
+		defalut_dirs = os.path.join(str(os.getcwd()), 'cloudmusic')
 		isExist = os.path.exists(defalut_dirs)
 		if not isExist:
 			os.makedirs(defalut_dirs)
+		dirs = os.path.join(defalut_dirs, name)
 	else :
-		dirs += "\\" + name
+		dirs = os.path.join(dirs, name)
+
+	if exist_ok and os.path.exists(dirs):
+		print("File %s is Exist" % dirs)
+		return
 
 	# 超时重连
 	for t in range(5):
 		try:
-			resp = urllib.request.urlopen(music.url, timeout=5)
+			resp = urllib.request.urlopen(music.url, timeout=10)
 			respHtml = resp.read()
 			break
 		except Exception as e:
@@ -36,16 +45,16 @@ def download(dirs, music):
 				print("download failed - " + music.id)
 				return None
 			print("Error: " + str(e) + " - " + "reconnect time: " + str(t))
-		time.sleep(1)
+		time.sleep(3)
 
 
 	binfile = open(dirs, "wb")
 	binfile.write(respHtml)
 	binfile.close()
 
-	print("dowload finish - " + music.id)
+	print("dowload finish - " + music.id+ ":"+ dirs)
 
-	return str(os.getcwd()) + dirs
+	return dirs
 
 
 class Downloader():

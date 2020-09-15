@@ -5,14 +5,27 @@ from . import api
 import re
 
 
+class MusicNotFoundException(Exception):
+
+    def __str__(self):
+        return "音乐信息获取失败"
+
+
+class MusicLevelNotAvailableException(Exception):
+    def __str__(self):
+        return "音质不支持下载"
+
+
 
 def createObj(ids, level):
     api = sessions.api.Api()
     musicUrl = api.get_song_url(dict(ID = ids, level = level))['data']
-    musicInfo = api.get_song_detail(dict(ID = ids))['songs']
+    musicDetails = api.get_song_detail(dict(ID = ids))
+    musicInfo = musicDetails['songs']
     musicOtp = []
     for i in range(len(ids)):
         mu = musicUrl[i]
+        info = {}
         for mi in musicInfo:
             if mi['id'] == mu['id']:
                 name = mi['name'] + " " + mi['alia'][0] if mi['alia'] else mi['name']
@@ -24,8 +37,22 @@ def createObj(ids, level):
                 info = dict(name = name, artist = artist, album = album, picUrl = picUrl, artistId = artistId, albumId = albumId)
                 musicInfo.remove(mi)
                 break
-        musicOtp.append(Music(mu["id"], mu["url"], mu["level"], mu["size"], mu["type"], info))
-    if len(musicUrl) == 1:
+        if not info:
+            print("获取歌曲 %d 信息失败" % (ids[i]))
+            continue
+
+        total_levels =  ["standard", "higher", "exhigh", "lossless"]
+        available_levels = []
+        for i, v in enumerate([128000, 192000, 320000, 999000]):
+            if musicDetails["privileges"][0]["downloadMaxbr"] >= v:
+                available_levels.append(total_levels[i])
+
+        level = mu.get("level") if mu.get("level") else level
+        musicOtp.append(Music(mu["id"], mu["url"], level, mu["size"], mu["type"], info, available_levels=available_levels))
+    if len(musicUrl)==1 and len(musicOtp)==0:
+        raise MusicNotFoundException()
+
+    if len(musicOtp) == 1:
         return musicOtp[0]
     return musicOtp
 
@@ -46,7 +73,7 @@ def createObj(ids, level):
 
 
 class Music:
-    def __init__(self, id_, url, level, size, type_, info):
+    def __init__(self, id_, url, level, size, type_, info, available_levels=[]):
         self.url = url
         self.id = str(id_)
         self.level = level
@@ -58,6 +85,7 @@ class Music:
         self.artistId = info['artistId']
         self.albumId = info['albumId']
         self.picUrl = info['picUrl']
+        self.available_levels=available_levels
         self.para = {
             "clas" : "",
             "ID" : self.id,
@@ -70,15 +98,17 @@ class Music:
     def __repr__(self):
         return "<Music object - "+ self.id +">"
 
-    def download(self, dirs="", level="standard"):
+    def download(self, dirs="", level="standard", name=None, exist_ok=False):
         if self.type:
             if level == "standard":
-                return download.download(dirs, self)
+                return download.download(dirs, self, name=name, exist_ok=exist_ok)
             elif level in self.levels:
-                return createObj([self.id], level).download()
+                return createObj([self.id], level).download(dirs=dirs, name=name, exist_ok=exist_ok)
             else:
-                print("没有这个level, 默认standard")
-                return download.download(dirs, self)
+                # level = self.available_levels[-1] if self.available_levels else "standard"
+                # print("没有这个level, 默认最高质量: %s" % level)
+                # return createObj([self.id], level).download()
+                raise MusicLevelNotAvailableException()
         else:
             print("download failed - " + self.id)
             return None
