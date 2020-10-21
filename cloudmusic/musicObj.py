@@ -1,3 +1,5 @@
+import json
+
 from . import download
 from . import sessions
 from . import api
@@ -34,17 +36,20 @@ def createObj(ids, level):
                 album = mi['al']['name']
                 albumId = mi['al']['id']
                 picUrl = mi['al']['picUrl']
-                info = dict(name = name, artist = artist, album = album, picUrl = picUrl, artistId = artistId, albumId = albumId)
+                duration = mi["dt"]
+                info = dict(name = name, artist = artist, album = album, picUrl = picUrl, artistId = artistId,
+                            albumId = albumId, duration=duration)
                 musicInfo.remove(mi)
                 break
         if not info:
             print("获取歌曲 %d 信息失败" % (ids[i]))
             continue
 
-        total_levels =  ["standard", "higher", "exhigh", "lossless"]
+        total_levels =  [ "standard", "higher", "exhigh", "lossless"]
         available_levels = []
-        for i, v in enumerate([128000, 192000, 320000, 999000]):
-            if musicDetails["privileges"][0]["downloadMaxbr"] >= v:
+        chargeInfoList = musicDetails["privileges"][0]["chargeInfoList"]
+        for i, v in enumerate(chargeInfoList):
+            if musicDetails["privileges"][0]["downloadMaxbr"] >= v["rate"]:
                 available_levels.append(total_levels[i])
 
         level = mu.get("level") if mu.get("level") else level
@@ -80,6 +85,7 @@ class Music:
         self.size = int(size)
         self.type = type_
         self.name = info['name']
+        self.duration = info['duration']
         self.artist =  info['artist']
         self.album = info['album']
         self.artistId = info['artistId']
@@ -98,11 +104,11 @@ class Music:
     def __repr__(self):
         return "<Music object - "+ self.id +">"
 
-    def download(self, dirs="", level="standard", name=None, exist_ok=False):
+    def download(self, dirs="", level=None, name=None, exist_ok=False):
         if self.type:
-            if level == "standard":
+            if level is None or level == self.level:
                 return download.download(dirs, self, name=name, exist_ok=exist_ok)
-            elif level in self.levels:
+            elif level in self.available_levels:
                 return createObj([self.id], level).download(dirs=dirs, name=name, exist_ok=exist_ok)
             else:
                 # level = self.available_levels[-1] if self.available_levels else "standard"
