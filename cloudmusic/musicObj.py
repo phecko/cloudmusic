@@ -18,6 +18,18 @@ class MusicLevelNotAvailableException(Exception):
         return "音质不支持下载"
 
 
+def get_real_level(br, file_type):
+    print(br, file_type)
+    if file_type == "flac":
+        return "lossless"
+    limit = [(128000, "standard"), (192000,"higher"), (320000, "exhigh")]
+    for b, level in limit:
+        if br < b:
+            return level
+    return "lossless"
+
+
+
 
 def createObj(ids, level):
     api = sessions.api.Api()
@@ -28,6 +40,10 @@ def createObj(ids, level):
     for i in range(len(ids)):
         mu = musicUrl[i]
         info = {}
+        real_level = get_real_level(mu["br"], mu["type"])
+        print(real_level, level)
+        if real_level != level:
+            continue
         for mi in musicInfo:
             if mi['id'] == mu['id']:
                 name = mi['name'] + " " + mi['alia'][0] if mi['alia'] else mi['name']
@@ -38,7 +54,7 @@ def createObj(ids, level):
                 picUrl = mi['al']['picUrl']
                 duration = mi["dt"]
                 info = dict(name = name, artist = artist, album = album, picUrl = picUrl, artistId = artistId,
-                            albumId = albumId, duration=duration)
+                            albumId = albumId, duration=duration, bitrate=mu["br"])
                 musicInfo.remove(mi)
                 break
         if not info:
@@ -86,6 +102,7 @@ class Music:
         self.type = type_
         self.name = info['name']
         self.duration = info['duration']
+        self.bitrate = info["bitrate"]
         self.artist =  info['artist']
         self.album = info['album']
         self.artistId = info['artistId']
@@ -109,7 +126,12 @@ class Music:
             if level is None or level == self.level:
                 return download.download(dirs, self, name=name, exist_ok=exist_ok)
             elif level in self.available_levels:
-                return createObj([self.id], level).download(dirs=dirs, name=name, exist_ok=exist_ok)
+                music =createObj([self.id], level)
+                if isinstance(music, Music):
+                    return music.download(dirs=dirs, name=name, exist_ok=exist_ok)
+                else:
+                    raise MusicLevelNotAvailableException()
+
             else:
                 # level = self.available_levels[-1] if self.available_levels else "standard"
                 # print("没有这个level, 默认最高质量: %s" % level)

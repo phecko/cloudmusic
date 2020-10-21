@@ -15,7 +15,7 @@ class Session():
         self.api = api.Api()
 
         # 默认音质
-        self.level = "higher"
+        self.level = "standard"
 
 
     def __enter__(self):

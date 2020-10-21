@@ -33,7 +33,6 @@ def download(dirs, music, name=None, exist_ok=False):
 	if exist_ok and os.path.exists(dirs):
 		print("File %s is Exist" % dirs)
 		return
-
 	# 超时重连
 	for t in range(5):
 		try:
