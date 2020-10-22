@@ -41,7 +41,7 @@ def createObj(ids, level):
         mu = musicUrl[i]
         info = {}
         real_level = get_real_level(mu["br"], mu["type"])
-        print(real_level, level)
+        print("real level:{} br:{} size:{} url:{}".format(real_level, mu["br"], mu["size"],mu["url"]))
         if real_level != level:
             continue
         for mi in musicInfo:

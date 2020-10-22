@@ -51,7 +51,7 @@ def download(dirs, music, name=None, exist_ok=False):
 	binfile.write(respHtml)
 	binfile.close()
 
-	print("dowload finish - " + music.id+ ":"+ dirs)
+	print("dowload finish - {}: {} from {} ".format(music.id, dirs, music.url))
 
 	return dirs
 

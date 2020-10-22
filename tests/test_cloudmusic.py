@@ -10,7 +10,7 @@ class TestCloudmusic(TestCase):
 
         for l in music_obj.available_levels:
             try:
-                music_obj.download(level=l)
+                music_obj.download(dirs="tmp", level=l)
                 print("level {} 获取成功 {}".format(l, music_obj.bitrate))
             except (cloudmusic.MusicLevelNotAvailableException, cloudmusic.MusicNotFoundException):
                 print("level {} 获取失败".format(l))
